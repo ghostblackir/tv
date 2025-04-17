@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تلویزیون آنلاین</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <link href="https://cdn.fontcdn.ir/Font/Persian/Vazir/Vazir.css" rel="stylesheet" />
+  <style>
+    body {
+  font-family: 'Vazir', sans-serif;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  direction: rtl;
+}
+
+.container {
+  margin: 20px auto;
+  max-width: 900px;
+}
+
+video {
+  width: 100%;
+  max-height: 400px;
+  background: #000;
+  margin-bottom: 20px;
+}
+
+.category-btn,
+.channel-btn {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 15px;
+  background: #333;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.category-section {
+  display: none;
+  margin-top: 10px;
+}
+
+#lockModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#lockModal input {
+  padding: 10px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  margin: 10px;
+}
+
+#search {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 12px 18px;
+  width: 250px;
+  font-size: 16px;
+  border-radius: 25px;
+  border: none;
+  background-color: #222;
+  color: #ffb400;
+  box-shadow: 0 0 15px rgba(255, 180, 0, 0.3);
+  transition: 0.3s ease;
+  z-index: 999;
+}
+
+#search::placeholder {
+  color: #999;
+}
+
+#search:focus {
+  outline: none;
+  background-color: #333;
+  box-shadow: 0 0 20px rgba(255, 180, 0, 0.5);
+}
+
+/* منو سه خطی */
+#menuToggle {
+  display: none;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #222;
+  color: #ffb400;
+  font-size: 24px;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  #menuToggle {
+    display: block;
+  }
+
+  #search {
+    display: none;
+  }
+
+  #search.active {
+    display: block;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+  }
+}
+
+/* بخش ساخته شده توسط زد */
+.footer-text {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #ccc;
+    }
+
+    /* لوگو تلگرام در گوشه بالا سمت چپ */
+    .telegram-logo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 40px;
+      height: 40px;
+      background: url('https://cdn-icons-png.flaticon.com/128/2111/2111646.png') no-repeat center center;
+      background-size: contain;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button id="menuToggle" onclick="toggleSearch()">☰</button>
+  <div class="container">
+    <h1> تلویزیون آنلاین 📺</h1>
+    <input type="text" id="search" placeholder="جستجوی شبکه..." oninput="searchChannels()" />
+    <video id="video" controls autoplay muted></video>
+
+    <!-- دسته‌بندی‌ها -->
+    <div>
+      <button class="category-btn" onclick="toggleCategory('farsi')"> شبکه‌های فارسی 📡</button>
+      <button class="category-btn" onclick="toggleCategory('foreign')"> شبکه‌های خارجی 🌐</button>
+      <button class="category-btn" id="lockButton" style="display:none;" onclick="checkLock()">+18 🔒</button>
+    </div>
+
+    
+    <!-- فارسی -->
+    <div id="farsi" class="category-section">
+      <button class="channel-btn" onclick="playChannel('https://slonehls.wns.live/hls/stream.m3u8')">SL 1</button>
+      <button class="channel-btn" onclick="playChannel('https://sl2.sigmatv.com/hls/live.m3u8')">SL 2</button>
+      <button class="channel-btn" onclick="playChannel('https://iptv.tapesh.tv/tapesh/playlist.m3u8')">Tapesh</button>
+      <button class="channel-btn" onclick="playChannel('https://icchls.wns.live/hls/stream.m3u8')">ICC</button>
+      <button class="channel-btn" onclick="playChannel('https://castor.streamthatvideo.co:8081/khaterehtv/index.m3u8')">Khatereh TV</button>
+      <button class="channel-btn" onclick="playChannel('https://metafilmhls.wns.live/hls/stream.m3u8')">Meta Film</button>
+      <button class="channel-btn" onclick="playChannel('https://live.livetvstream.co.uk/LS-63503-4/index.m3u8')">Iran International TV</button>
+      <button class="channel-btn" onclick="playChannel('https://hls.pmc.live/hls/stream.m3u8')">PMC</button>
+      <button class="channel-btn" onclick="playChannel('https://mtchls.wns.live/hls/stream.m3u8')">MTC</button>
+      <button class="channel-btn" onclick="playChannel('https://rjtvhls.wns.live/hls/stream.m3u8')">Radio Javan TV</button>
+      <button class="channel-btn" onclick="playChannel('https://turkhls.persiana.live/hls/stream.m3u8')">Persiana Turkiye</button>
+      <button class="channel-btn" onclick="playChannel('https://voa-ingest.akamaized.net/hls/live/2033876/tvmc07/playlist.m3u8')">VOA Persian</button>
+      <button class="channel-btn" onclick="playChannel('https://tixbolt.com/royaltv/tracks-v1a1/mono.ts.m3u8')">Royal Time TV</button>
+      <button class="channel-btn" onclick="playChannel('https://clshls.wns.live/hls/stream.m3u8')">Classic TV</button>
+      <button class="channel-btn" onclick="playChannel('https://fxtvhls.wns.live/hls/stream.m3u8')">FX TV 1</button>
+      <button class="channel-btn" onclick="playChannel('https://araxhls.wns.live/hls/stream.m3u8')">Arax TV</button>
+      <button class="channel-btn" onclick="playChannel('https://me2hls.wns.live/hls/stream.m3u8')">ME2 TV</button>
+      <button class="channel-btn" onclick="playChannel('https://sonhls.persiana.live/hls/stream.m3u8')">Persiana Sonnati</button>
+      <button class="channel-btn" onclick="playChannel('https://euhls.persiana.live/hls/stream.m3u8')">Persiana HD</button>
+      <button class="channel-btn" onclick="playChannel('https://comedyhls.persiana.live/hls/stream.m3u8')">Persiana Comedy</button>
+      <button class="channel-btn" onclick="playChannel('https://irhls.persiana.live/hls/stream.m3u8')">Persiana Iranian</button>
+      <button class="channel-btn" onclick="playChannel('https://cinehls.persiana.live/hls/stream.m3u8')">Persiana Cinema</button>
+      <button class="channel-btn" onclick="playChannel('https://familyhls.persiana.live/hls/stream.m3u8')">Persiana Family</button>
+      <button class="channel-btn" onclick="playChannel('https://latinohls.persiana.live/hls/stream.m3u8')">Persiana Latino</button>
+      <button class="channel-btn" onclick="playChannel('https://fastdehost.com/live/kingmovie.m3u8')">King Movie</button>
+      <button class="channel-btn" onclick="playChannel('https://fastdehost.com/live/serialbaran1.m3u8')">Serial Baran</button>
+      <button class="channel-btn" onclick="playChannel('https://stream.sainaertebat.com/hls2/varzeshtest.m3u8')">Shabake Varzesh</button>
+    </div>
+
+    <!-- خارجی -->
+    <div id="foreign" class="category-section">
+      <button class="channel-btn" onclick="playChannel('https://fast-channels.sinclairstoryline.com/COMET/index_3.m3u8')">Comet TV</button>
+      <button class="channel-btn" onclick="playChannel('https://d2p372oxiwmcn1.cloudfront.net/hls/360p/playlist.m3u8')">WWE TV</button>
+      <button class="channel-btn" onclick="playChannel('https://live.cdn.joj.sk/live/andromeda/wau-404.m3u8')">JOJ Family</button>
+      <button class="channel-btn" onclick="playChannel('https://nowhls.wns.live/hls/stream.m3u8')">News Of The World</button>
+      <button class="channel-btn" onclick="playChannel('https://d2vnbkvjbims7j.cloudfront.net/containerA/LTN/playlist.m3u8')">BBC News</button>
+      <button class="channel-btn" onclick="playChannel('https://circle-samsung.amagi.tv/playlist.m3u8')">Circle Country</button>
+      <button class="channel-btn" onclick="playChannel('https://live.m2.tv/hls3/360/stream.m3u8')">M2 Music</button>
+      <button class="channel-btn" onclick="playChannel('https://fash1043.cloudycdn.services/slive/ftv_ftv_midnite_k1y_27049_midnite_secr_108_hls.smil/media.m3u8')">FTV Bikini</button>
+      <button class="channel-btn" onclick="playChannel('https://m1b2.worldcast.tv/dancetelevisionone/2/dancetelevisionone.m3u8')">BestOf DanceTV</button>
+      <button class="channel-btn" onclick="playChannel('https://edge17.vedge.infomaniak.com/livecast/ik:event/chunklist_w790979154.m3u8')">Carac 1</button>
+      <button class="channel-btn" onclick="playChannel('https://edge14.vedge.infomaniak.com/livecast/ik:lfmmd/chunklist_w290004262_b300000.m3u8')">carac 2</button>
+      <button class="channel-btn" onclick="playChannel('https://edge17.vedge.infomaniak.com/livecast/ik:compack_media_1/chunklist_w864677241_b300000.m3u8')">carac 3</button>
+      <button class="channel-btn" onclick="playChannel('https://appletree-mytime-samsungbrazil.amagi.tv/playlist360p.m3u8')">film tv</button>
+    </div>
+
+    <!-- +18 (قفل‌دار) -->
+    <div id="+18" class="category-section">
+      <button class="channel-btn" onclick="playChannel('https://live.iptvxxx.net/penthousepassiontv.m3u8')">Penthouse Passion Tv</button>
+      <button class="channel-btn" onclick="playChannel('https://live.iptvxxx.net/sunbeachtv.m3u8')">Hrvati Vole Da Tuku Sipce</button>
+      <button class="channel-btn" onclick="playChannel('https://live.iptvxxx.net/siptarskiSMRADOVI.m3u8')">Pita Amko Gdje Su Vam Cerke</button>
+      <button class="channel-btn" onclick="playChannel('https://live.iptvxxx.net/privatetv.m3u8')">Private Tv</button>
+      <button class="channel-btn" onclick="playChannel('https://live.redtraffic.net/bigass.m3u8')">Big Ass</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/livecams.m3u8')">Live Cams Porn</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/milf.m3u8')">MILF Porn IPTV</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/pornstar.m3u8')">Pornstar</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/asian.m3u8')">Asian Porn</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/blonde.m3u8')">Blonde Porn</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/anal.m3u8')">Anal Porno</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/lesbian.m3u8')">Lesbian Porn</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/gay.m3u8')">Gay Porno</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/bigtits.m3u8')">Big Tits Porn</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/fetish.m3u8')">Fetish XXX</button>
+      <button class="channel-btn" onclick="playChannel('https://live.adultiptv.net/rough.m3u8')">Rough Porn</button>
+      <button class="channel-btn" onclick="playChannel('https://ortepe.xyz:20496/tv/brazzers/chunks.m3u8')">brazzers</button>
+    </div>
+
+    <!-- پنجره قفل -->
+    <div id="lockModal" style="display:none;">
+      <div>
+        <h2>🔐 ورود به بخش +18</h2>
+        <input type="password" id="lockInput" placeholder="رمز ورود..." />
+        <button onclick="unlockSection()">ورود</button>
+      </div>
+    </div>
+  </div>
+<!-- لینک ساخته شده توسط زد -->
+<div class="footer-text">
+  ساخته شده توسط <a href="https://t.me/zed_exe" target="_blank">زد</a>
+</div>
+</div>
+
+<!-- لوگو تلگرام برای کانال aqay_ghost -->
+<div class="telegram-logo" onclick="window.open('https://t.me/aqay_ghost', '_blank')"></div>
+  <script>
+    let locked = true;
+    let userLoggedIn = false;
+    const codes = []; // برای ذخیره پسوردها
+
+    // بارگزاری پسوردهای یکبار مصرف از فایل JSON
+    fetch('codes.json')
+      .then(response => response.json())
+      .then(data => {
+        codes.push(...data); // اضافه کردن پسوردهای یکبار مصرف
+      });
+
+    function toggleCategory(id) {
+      document.querySelectorAll('.category-section').forEach(section => section.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+
+    function playChannel(url) {
+      const video = document.getElementById('video');
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.play();
+      }
+    }
+
+    function checkLock() {
+      if (!userLoggedIn) {
+        document.getElementById('lockModal').style.display = 'flex';
+        document.getElementById('lockButton').style.display = 'none';
+      } else {
+        toggleCategory('+18');
+      }
+    }
+
+    function unlockSection() {
+      const input = document.getElementById('lockInput').value;
+      if (codes.some(code => code.code === input && !code.used)) {
+        userLoggedIn = true;
+        document.getElementById('lockModal').style.display = 'none';
+        toggleCategory('+18');
+        document.getElementById('lockButton').style.display = 'none';
+        localStorage.setItem('loggedIn', 'true');
+        const usedCode = codes.find(code => code.code === input);
+        if (usedCode) {
+          usedCode.used = true;
+        }
+      } else {
+        alert('رمز اشتباه است!');
+      }
+    }
+
+    function searchChannels() {
+      const keyword = document.getElementById('search').value.toLowerCase();
+      if (keyword.includes('+18')) {
+        document.getElementById('lockButton').style.display = 'inline-block';
+      } else {
+        document.getElementById('lockButton').style.display = 'none';
+      }
+    }
+
+    // بررسی ورود از localStorage
+    if (localStorage.getItem('loggedIn') === 'true') {
+      userLoggedIn = true;
+      document.getElementById('lockButton').style.display = 'none';
+    }
+
+    // خروج از سایت
+    function logout() {
+      localStorage.removeItem('loggedIn');
+      userLoggedIn = false;
+      document.getElementById('lockButton').style.display = 'none';
+    }
+
+    // زمانیکه از سایت خارج میشه دکمه +18 مخفی میشه
+    window.addEventListener('beforeunload', function () {
+      logout();
+    });
+
+    function toggleSearch() {
+  const searchInput = document.getElementById('search');
+  searchInput.classList.toggle('active');
+}
+
+  </script>
+</body>
+</html>
